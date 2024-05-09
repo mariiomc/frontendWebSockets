@@ -26,13 +26,16 @@ ChatController chatController = ChatController();
 
 @override
   void initState() {
-    socket = IO.io('http://localhost:4000', IO.OptionBuilder()
-    .setTransports(['websocket'])
-    .disableAutoConnect()
-    .build());
+    socket = IO.io(
+      'http://localhost:3000',
+       IO.OptionBuilder()
+          .setTransports(['websocket'])
+          .disableAutoConnect()
+          .build());
     socket.connect();
     setUpSocketListener();
     super.initState();
+    print("Socket connected: ${socket.connected} --- Socket id: ${socket.id}");
   }
 
   @override
@@ -63,14 +66,13 @@ ChatController chatController = ChatController();
                   itemBuilder: (context, index){
                     var currentItem = chatController.chatMessages[index];
                   return MessageItem(
-
                     sentByMe: currentItem.sentByMe == socket.id,
                     message: currentItem.message,
                     );
-                },
+                  },
                 ),
               ),
-              ),
+            ),
             Expanded(
               child: Container(
                 padding: EdgeInsets.all(10),
@@ -106,12 +108,11 @@ ChatController chatController = ChatController();
                       )
                     )
                   )
-
                 ),
               ),
             ),
-
-          ],)
+          ],
+        ),
       ),
     );
   }
@@ -125,7 +126,6 @@ ChatController chatController = ChatController();
   socket.emit('message', messageJson);
   chatController.chatMessages.add(Message.fromJson(messageJson));
 }
-
 
   void setUpSocketListener() {
     socket.on('message-receive', (data){
