@@ -118,6 +118,9 @@ ChatController chatController = ChatController();
   }
   
   void sendMessage(String text) {
+    print(socket);
+    print(socket.id);
+    print(socket.connected);
   var messageJson = {
     "message": text,
     "sentByMe": socket.id ?? "" // Asigna una cadena vacía si socket.id es nulo
