@@ -18,8 +18,8 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen>{
-  Color purple = Color(0xFF6c5ce7);
-  Color black = Color(0xFF191919);
+  Color purple = Color.fromARGB(255, 108, 92, 231);
+  Color black = Color.fromARGB(255, 5, 5, 5);
   TextEditingController msgInputController = TextEditingController();
 late IO.Socket socket;
 ChatController chatController = ChatController();
@@ -96,7 +96,7 @@ ChatController chatController = ChatController();
                         borderRadius: BorderRadius.circular(10),
                         color:purple,
                       ),
-                      color: purple,
+                      //color: purple,
                       child: IconButton(
                         onPressed: () {
                           sendMessage(msgInputController.text);
@@ -117,15 +117,16 @@ ChatController chatController = ChatController();
   }
   
   void sendMessage(String text) {
-    var messageJson = {
-      "message":text,
-      "sentByMe": socket.id
-    };
-    socket.emit('message', messageJson);
-    chatController.chatMessages.add(Message.fromJson(messageJson));
+  var messageJson = {
+    "message": text,
+    "sentByMe": socket.id ?? "" // Asigna una cadena vacía si socket.id es nulo
+  };
+  print('Mensaje: $messageJson');
+  socket.emit('message', messageJson);
+  chatController.chatMessages.add(Message.fromJson(messageJson));
+}
 
-  }
-  
+
   void setUpSocketListener() {
     socket.on('message-receive', (data){
       print(data);
@@ -138,47 +139,50 @@ ChatController chatController = ChatController();
   }
 }
 
-class MessageItem extends StatelessWidget{
-  const MessageItem ({Key? key, required this.sentByMe, required this.message}) : super(key : key);
+class MessageItem extends StatelessWidget {
+  const MessageItem({Key? key, required this.sentByMe, required this.message})
+      : super(key: key);
+
   final bool sentByMe;
   final String message;
-@override
-Widget build (BuildContext context){
-  Color purple = Color(0xFF6c5ce7);
-  Color white = Colors.white;
-  return Align(
-    alignment: sentByMe? Alignment.centerRight: Alignment.centerLeft,
-  child: Container(
-    padding: EdgeInsets.symmetric(vertical: 5,horizontal: 10,),
-    margin : EdgeInsets.symmetric(vertical:3,horizontal: 10,),
-    decoration:  BoxDecoration(
-      borderRadius: BorderRadius.circular(5),
-      color: sentByMe? purple: white,
-    ),
-    color: sentByMe? purple: white,
-    child: Row(
-      mainAxisSize: MainAxisSize.min ,
-      crossAxisAlignment:  CrossAxisAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic,
-      children: [
-        Text(
-          "Hello",
-          style:TextStyle(
-            color: sentByMe? white: purple,
-            fontSize: 18,
-           )
+
+  @override
+  Widget build(BuildContext context) {
+    Color purple = Color(0xFF6c5ce7);
+    Color white = Colors.white;
+
+    return Align(
+      alignment: sentByMe ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+        margin: EdgeInsets.symmetric(vertical: 3, horizontal: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5),
+          color: sentByMe ? purple : white,
         ),
-        SizedBox(width: 5),
-        Text(
-          "1:10 AM",
-          style:TextStyle(
-            color: (sentByMe? white: purple).withOpacity(0.7),
-            fontSize: 10,
-           )
-        )
-      ],
-      )
-    ),
-  );
-}
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              message ?? '', // Usar el operador null-aware para evitar null
+              style: TextStyle(
+                color: sentByMe ? white : purple,
+                fontSize: 18,
+              ),
+            ),
+            SizedBox(width: 5),
+            Text(
+              "1:10 AM",
+              style: TextStyle(
+                color: (sentByMe ? white : purple).withOpacity(0.7),
+                fontSize: 10,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
 }
