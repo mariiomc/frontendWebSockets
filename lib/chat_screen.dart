@@ -21,22 +21,24 @@ class _ChatScreenState extends State<ChatScreen>{
   Color purple = Color.fromARGB(255, 108, 92, 231);
   Color black = Color.fromARGB(255, 5, 5, 5);
   TextEditingController msgInputController = TextEditingController();
+    TextEditingController textController = TextEditingController();
+
 late IO.Socket socket;
 ChatController chatController = ChatController();
 
 @override
-  void initState() {
-    socket = IO.io(
-      'http://localhost:3000',
-       IO.OptionBuilder()
-          .setTransports(['websocket'])
-          .disableAutoConnect()
-          .build());
-    socket.connect();
-    setUpSocketListener();
-    super.initState();
-    print("Socket connected: ${socket.connected} --- Socket id: ${socket.id}");
-  }
+  // void initState() {
+  //   socket = IO.io(
+  //     'http://localhost:4000',
+  //      IO.OptionBuilder()
+  //         .setTransports(['websocket'])
+  //         .disableAutoConnect()
+  //         .build());
+  //   socket.connect();
+  //   setUpSocketListener();
+  //   super.initState();
+  //   print("Socket connected: ${socket.connected} --- Socket id: ${socket.id}");
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -111,6 +113,51 @@ ChatController chatController = ChatController();
                 ),
               ),
             ),
+            Expanded(
+            child: Row(
+              children: [
+                // Campo de entrada de texto
+                Expanded(
+                  child: TextField(
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                    controller: textController, // Un controlador para capturar el texto introducido
+                    decoration: InputDecoration(
+                      hintText: 'Introduce un texto',
+                      hintStyle: TextStyle(
+                        color: Colors.white.withOpacity(0.5),
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10), // Separación entre el campo de entrada de texto y el botón
+                // Botón
+                Container(
+                  child: IconButton(
+                        onPressed: () {
+                          createConnection(textController.text);
+                          textController.text="";
+                        },
+                        icon: Icon(Icons.send, color: Colors.white,),
+                      )
+                ),
+              ],
+            ),
+          )
+
           ],
         ),
       ),
@@ -129,6 +176,19 @@ ChatController chatController = ChatController();
   socket.emit('message', messageJson);
   chatController.chatMessages.add(Message.fromJson(messageJson));
 }
+
+void createConnection(String room) {
+    socket = IO.io(
+      'http://localhost:4000/${room}',
+       IO.OptionBuilder()
+          .setTransports(['websocket'])
+          .disableAutoConnect()
+          .build());
+    socket.connect();
+    setUpSocketListener();
+    super.initState();
+    print("Socket connected: ${socket.connected} --- Socket id: ${socket.id}");
+  }
 
   void setUpSocketListener() {
     socket.on('message-receive', (data){
